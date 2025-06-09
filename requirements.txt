@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+requests
+feedparser
+jinja2
+beautifulsoup4
+python-multipart
+transformers
+torch
+pyttsx3
+gTTS 

@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewsBreeze - Celebrity-Powered Audio News Reader</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary-color: #764ba2;
+            --accent-color: #f093fb;
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --success-color: #48bb78;
+            --error-color: #f56565;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--background) 0%, #e6f3ff 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 2rem 0;
+            margin: 0 -20px 2rem -20px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-content {
+            padding: 0 2rem;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo i {
+            color: var(--accent-color);
+            animation: pulse 2s infinite;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .controls {
+            padding: 0 2rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .voice-selector {
+            padding: 0.75rem 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            transition: var(--transition);
+        }
+
+        .voice-selector option {
+            background: var(--surface);
+            color: var(--text-primary);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-primary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .loading-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        .news-container {
+            flex: 1;
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .news-item {
+            background: var(--surface);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+        }
+
+        .news-item:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .news-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.4;
+            margin-bottom: 0.5rem;
+        }
+
+        .news-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .news-source {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.75rem;
+        }
+
+        .news-summary {
+            color: var(--text-secondary);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .news-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-listen {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-listen:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-listen:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-read-more {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-read-more:hover {
+            color: var(--primary-dark);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            margin-top: auto;
+        }
+
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+        }
+
+        .toast {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1rem 1.5rem;
+            margin-bottom: 0.5rem;
+            box-shadow: var(--shadow-lg);
+            transform: translateX(400px);
+            transition: var(--transition);
+            max-width: 350px;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--error-color);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .controls {
+                justify-content: center;
+            }
+            
+            .news-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="logo">
+                    <i class="fas fa-microphone-alt"></i>
+                    NewsBreeze
+                </h1>
+                <p class="tagline">Your Celebrity-Powered Audio News Reader</p>
+            </div>
+            <div class="controls">
+                <select id="voiceSelect" class="voice-selector">
+                    <option value="morgan_freeman">Morgan Freeman</option>
+                    <option value="david_attenborough">David Attenborough</option>
+                    <option value="barack_obama">Barack Obama</option>
+                    <option value="stephen_hawking">Stephen Hawking</option>
+                    <option value="winston_churchill">Winston Churchill</option>
+                </select>
+                <button id="refreshBtn" class="btn btn-primary">
+                    <i class="fas fa-sync-alt"></i> Refresh News
+                </button>
+            </div>
+        </header>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading latest news from RSS feeds...</p>
+        </div>
+
+        <!-- News Container -->
+        <main id="newsContainer" class="news-container">
+            <!-- News items will be dynamically loaded here -->
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>&copy; 2024 NewsBreeze. Powered by Real RSS Feeds and AI.</p>
+            <div class="tech-stack">
+                <span>Sources: CNN, NY Times, Washington Post, USA Today, NPR, BBC</span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <script>
+        class NewsBreeze {
+            constructor() {
+                this.newsData = [];
+                this.selectedVoice = 'morgan_freeman';
+                this.isLoading = false;
+                
+                this.init();
+            }
+
+            init() {
+                this.bindEvents();
+                this.loadNews();
+                this.loadVoices();
+            }
+
+            bindEvents() {
+                document.getElementById('refreshBtn').addEventListener('click', () => {
+                    this.loadNews(true);
+                });
+
+                document.getElementById('voiceSelect').addEventListener('change', (e) => {
+                    this.selectedVoice = e.target.value;
+                });
+            }
+
+            async loadNews(forceRefresh = false) {
+                if (this.isLoading) return;
+                
+                this.isLoading = true;
+                this.showLoading(true);
+
+                try {
+                    const response = await fetch('/api/news' + (forceRefresh ? '?refresh=true' : ''));
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    this.newsData = data.news;
+                    this.renderNews();
+                    
+                    if (data.cached) {
+                        this.showToast('News loaded from cache', 'success');
+                    } else {
+                        this.showToast(`Loaded ${data.news.length} fresh news articles`, 'success');
+                    }
+
+                } catch (error) {
+                    console.error('Error loading news:', error);
+                    this.showToast('Failed to load news. Please try again.', 'error');
+                    this.renderError();
+                } finally {
+                    this.isLoading = false;
+                    this.showLoading(false);
+                }
+            }
+
+            async loadVoices() {
+                try {
+                    const response = await fetch('/api/voices');
+                    const data = await response.json();
+                    
+                    const voiceSelect = document.getElementById('voiceSelect');
+                    voiceSelect.innerHTML = '';
+                    
+                    data.voices.forEach(voice => {
+                        const option = document.createElement('option');
+                        option.value = voice.name;
+                        option.textContent = voice.display_name;
+                        voiceSelect.appendChild(option);
+                    });
+
+                } catch (error) {
+                    console.error('Error loading voices:', error);
+                }
+            }
+
+            renderNews() {
+                const container = document.getElementById('newsContainer');
+                
+                if (this.newsData.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 4rem 2rem;">
+                            <i class="fas fa-newspaper" style="font-size: 4rem; color: var(--text-secondary); margin-bottom: 1rem;"></i>
+                            <h3>No news available</h3>
+                            <p style="color: var(--text-secondary);">Try refreshing to load the latest news.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = this.newsData.map((article, index) => `
+                    <article class="news-item fade-in" style="animation-delay: ${index * 0.1}s">
+                        <h2 class="news-title">${this.escapeHtml(article.title)}</h2>
+                        <div class="news-meta">
+                            <span class="news-source">${this.escapeHtml(article.source)}</span>
+                            <span><i class="fas fa-clock"></i> ${this.formatDate(article.published)}</span>
+                        </div>
+                        
+                        <div class="news-summary">
+                            ${this.escapeHtml(article.summary)}
+                        </div>
+                        
+                        <div class="news-actions">
+                            <button class="btn-listen" onclick="newsApp.generateAndPlayAudio(${index})">
+                                <i class="fas fa-play"></i>
+                                Listen with ${this.getVoiceDisplayName()}
+                            </button>
+                            <a href="${article.url}" target="_blank" rel="noopener noreferrer" class="btn-read-more">
+                                <i class="fas fa-external-link-alt"></i>
+                                Read Full Article
+                            </a>
+                        </div>
+                    </article>
+                `).join('');
+            }
+
+            renderError() {
+                const container = document.getElementById('newsContainer');
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 4rem 2rem;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: var(--error-color); margin-bottom: 1rem;"></i>
+                        <h3>Failed to Load News</h3>
+                        <p style="color: var(--text-secondary); margin-bottom: 2rem;">
+                            There was an error loading the latest news from RSS feeds. Please check your connection and try again.
+                        </p>
+                        <button class="btn btn-primary" onclick="newsApp.loadNews(true)">
+                            <i class="fas fa-sync-alt"></i>
+                            Try Again
+                        </button>
+                    </div>
+                `;
+            }
+
+            async generateAndPlayAudio(articleIndex) {
+                const article = this.newsData[articleIndex];
+                if (!article) return;
+
+                const button = document.querySelector(`article:nth-child(${articleIndex + 1}) .btn-listen`);
+                const originalText = button.innerHTML;
+                
+                button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Audio...';
+                button.disabled = true;
+
+                try {
+                    const response = await fetch('/api/generate-audio', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            text: `${article.title}. ${article.summary}`,
+                            voice_name: this.selectedVoice
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.success && data.audio_url) {
+                        this.showToast(data.message, 'success');
+                        
+                        // Play the generated audio file
+                        const audio = new Audio(data.audio_url);
+                        audio.play().catch(e => {
+                            console.error('Error playing audio:', e);
+                            this.showToast('Audio generated but playback failed', 'warning');
+                        });
+                    } else {
+                        this.showToast(data.message || 'Failed to generate audio', 'error');
+                    }
+
+                } catch (error) {
+                    console.error('Error generating audio:', error);
+                    this.showToast('Failed to generate audio. Please try again.', 'error');
+                } finally {
+                    button.innerHTML = originalText;
+                    button.disabled = false;
+                }
+            }
+
+            showLoading(show) {
+                const loadingState = document.getElementById('loadingState');
+                const newsContainer = document.getElementById('newsContainer');
+                
+                if (show) {
+                    loadingState.style.display = 'block';
+                    newsContainer.style.display = 'none';
+                } else {
+                    loadingState.style.display = 'none';
+                    newsContainer.style.display = 'block';
+                }
+            }
+
+            showToast(message, type = 'success') {
+                const toastContainer = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <i class="fas fa-${this.getToastIcon(type)}"></i>
+                        <span>${this.escapeHtml(message)}</span>
+                    </div>
+                `;
+
+                toastContainer.appendChild(toast);
+
+                setTimeout(() => toast.classList.add('show'), 100);
+
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.parentNode.removeChild(toast);
+                        }
+                    }, 300);
+                }, 5000);
+            }
+
+            getToastIcon(type) {
+                const icons = {
+                    success: 'check-circle',
+                    error: 'exclamation-circle',
+                    warning: 'exclamation-triangle',
+                    info: 'info-circle'
+                };
+                return icons[type] || 'info-circle';
+            }
+
+            getVoiceDisplayName() {
+                const voiceSelect = document.getElementById('voiceSelect');
+                const selectedOption = voiceSelect.options[voiceSelect.selectedIndex];
+                return selectedOption ? selectedOption.textContent : 'AI Voice';
+            }
+
+            formatDate(dateString) {
+                try {
+                    const date = new Date(dateString);
+                    const now = new Date();
+                    const diffTime = Math.abs(now - date);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                    if (diffDays === 1) {
+                        return 'Today';
+                    } else if (diffDays === 2) {
+                        return 'Yesterday';
+                    } else if (diffDays <= 7) {
+                        return `${diffDays - 1} days ago`;
+                    } else {
+                        return date.toLocaleDateString();
+                    }
+                } catch (error) {
+                    return 'Recently';
+                }
+            }
+
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
+        }
+
+        let newsApp;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            newsApp = new NewsBreeze();
+        });
+    </script>
+</body>
+</html>
